@@ -39,13 +39,15 @@ int main()
 
   // get x queues
   Queue queue[xys[0]];
-  for (int i = 0; i < xys[0]; i++)
+  for (int i = 0; i < xys[0]; i++) {
     getqueues(fp, &queue[i]);
+  }
 
   // get y processes
   Process process[xys[1]];
-  for (int i = 0; i < xys[1]; i++)
+  for (int i = 0; i < xys[1]; i++) {
     getprocess(fp, &process[i]);
+  }
 
   // close file
   fclose(fp);
@@ -59,38 +61,41 @@ int main()
   else if (checkprocesses(process, xys[1])) {
   } else if (checkqueues(queue, xys[0])) {
   } else {
+    sortqbypriority(queue, xys[0]);
     mlfq(queue, xys[0], process, xys[1], xys[2]);
   }
+
   return 0;
 }
 
 // scans processes from file & initializes values
 void getprocess(FILE* fp, Process* process)
 {
-  if (feof(fp)) {
-    printf("Number of listed processes is less than the specfied amount.\n");
+  if (fscanf(fp, "%d", &process->pid) == EOF
+      || fscanf(fp, "%d", &process->arrival) == EOF
+      || fscanf(fp, "%d", &process->burst) == EOF
+      || fscanf(fp, "%d", &process->iobt) == EOF
+      || fscanf(fp, "%d", &process->iofreq) == EOF) {
+    printf("Number of listed values is less than the specfied amount.\n");
     exit(EXIT_FAILURE);
   } else {
-    fscanf(fp, "%d", &process->pid);
-    fscanf(fp, "%d", &process->arrival);
-    fscanf(fp, "%d", &process->burst);
-    fscanf(fp, "%d", &process->iobt);
-    fscanf(fp, "%d", &process->iofreq);
     process->exectime = process->burst;
     process->arrtime = process->arrival;
+    process->next = NULL;
   }
 }
 
-// scans queues from file
+// scans queues from file & init values
 void getqueues(FILE* fp, Queue* queue)
 {
-  if (feof(fp)) {
-    printf("Number of listed queues is less than the specfied amount.\n");
+  if (fscanf(fp, "%d", &queue->qid) == EOF
+      || fscanf(fp, "%d", &queue->priority) == EOF
+      || fscanf(fp, "%d", &queue->timequant) == EOF) {
+    printf("Number of values is less than the specfied amount.\n");
     exit(EXIT_FAILURE);
   } else {
-    fscanf(fp, "%d", &queue->qid);
-    fscanf(fp, "%d", &queue->priority);
-    fscanf(fp, "%d", &queue->timequant);
+    queue->head = NULL;
+    queue->tail = NULL;
   }
 }
 
@@ -102,24 +107,12 @@ int checkprocesses(Process process[], int n)
         printf("PIDs should not be the same.\n");
         return 1;
       }
-    if (process[i].pid < 0) {
-      printf("PIDs should not be negative.\n");
-      return 1;
-    }
-    if (process[i].arrival < 0) {
-      printf("Arrival should not be negative.\n");
-      return 1;
-    }
-    if (process[i].iobt < 0) {
-      printf("IO burst time should not be negative.\n");
-      return 1;
-    }
-    if (process[i].iofreq < 0) {
-      printf("Frequency of IO burst should not be negative.\n");
-      return 1;
-    }
-    if (process[i].burst < 0) {
-      printf("Burst should not be negative.\n");
+    if (process[i].pid < 0
+        || process[i].arrival < 0
+        || process[i].iobt < 0
+        || process[i].iofreq < 0
+        || process[i].burst < 0) {
+      printf("Process values should not be negative.\n");
       return 1;
     }
   }
@@ -130,20 +123,15 @@ int checkqueues(Queue queue[], int n)
 {
   for (int i = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++)
-      if (queue[i].qid == queue[j].qid) {
-        printf("QIDs should not be the same.\n");
+      if (queue[i].qid == queue[j].qid
+          || queue[i].priority == queue[j].priority) {
+        printf("Neither QIDs nor priorities should have the same values.\n");
         return 1;
       }
-    if (queue[i].qid < 0) {
-      printf("QIDs should not be negative.\n");
-      return 1;
-    }
-    if (queue[i].priority < 0) {
-      printf("Priority should not be negative.\n");
-      return 1;
-    }
-    if (queue[i].timequant < 0) {
-      printf("Time quantum should not be negative.\n");
+    if (queue[i].qid < 0
+        || queue[i].priority < 0
+        || queue[i].timequant < 0) {
+      printf("Queue values should not be negative.\n");
       return 1;
     }
   }

@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef PROCESS
 #define PROCESS
@@ -18,12 +19,14 @@ typedef struct process {
   int completion; // end time
   int waiting;
   int turnaround;
+  struct process* next;
 } Process;
 
 /** Function Declarations **/
 void setprocess(Process* process, int* clock, int exectime);
 void sortbyarrival(Process process[], int n);
 void sortbyburst(Process process[], int n);
+void sortbypid(Process process[], int n);
 
 void setprocess(Process* process, int* clock, int exectime)
 {

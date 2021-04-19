@@ -3,7 +3,25 @@
 #include <math.h>
 #include <stdio.h>
 
-void rr(Process process[], int n, int timeslice)
+void rr(Queue q, int timeslice, int* clock, int* totalexec)
+{
+  int exec = 0;
+  printf("Q[%d]\t", q.priority);
+
+  Process* curr = q.head;
+  while (curr != q.tail->next) {
+    exec = (timeslice < curr->exectime) ? timeslice : curr->exectime;
+    curr->exectime -= exec;
+    *totalexec += exec;
+    printf("P%d:%d\t", curr->pid, curr->exectime);
+    curr = curr->next;
+  }
+
+  *clock += *totalexec;
+}
+
+/*
+void rr(Process process[], int n, int timeslice, int* clock)
 {
   // calculate size of queue (amount of context switches)
   int qsize = 0;
@@ -14,7 +32,7 @@ void rr(Process process[], int n, int timeslice)
 
   // init values
   Process queue[qsize];
-  int clock = 0, idx = 0, last = -1;
+  int idx = 0, last = -1;
   float awt = 0;
 
   // while all slices not in queue
@@ -32,7 +50,7 @@ void rr(Process process[], int n, int timeslice)
 
         // if remaining burst time > timeslice, execute process for timeslice units
         int exectime = (queue[idx].exectime > timeslice) ? timeslice : queue[idx].exectime;
-        setprocess(&queue[idx], &clock, exectime);
+        setprocess(&queue[idx], clock, exectime);
 
         // if process is done executing, add process waiting time to awt
         if (queue[idx].exectime <= 0) awt += queue[idx].waiting;
@@ -66,3 +84,4 @@ void rr(Process process[], int n, int timeslice)
   printgnatt(queue, idx);
   printprocess(process, n, queue, idx, awt);
 }
+*/
