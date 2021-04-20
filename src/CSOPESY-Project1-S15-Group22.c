@@ -82,6 +82,7 @@ void getprocess(FILE* fp, Process* process)
     process->exectime = process->burst;
     process->arrtime = process->arrival;
     process->next = NULL;
+    process->inqueue = 0;
   }
 }
 

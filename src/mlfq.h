@@ -19,54 +19,68 @@
 
 void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 {
-  int clock = 0, rpro = y, sum = 0;
+  int clock = 0, rpro = y, sum = 0, pb = pboost;
   float awt = 0;
-  Queue temp = { .qid = -1, .priority = 0, .timequant = 0 };
+  Queue gnatt = { .qid = -1, .priority = 0, .timequant = 0, .head = NULL, .tail = NULL };
 
   sortbyarrival(process, y);
-
-  // add ready processes to highest priority queue
-  for (int j = 0; j < y; j++)
-    if (process[j].arrtime <= 0 && process[j].exectime > 0)
-      enqueue(&temp, &process[j]);
-
-  while (rpro > 0 && clock < 100) {
+  while (rpro > 0) {
     int flag = 0;
+
+    // add ready processes to highest priority queue
+    rpro = y;
+    for (int j = 0; j < y; j++) {
+      if (process[j].arrtime <= 0 && process[j].exectime > 0 && process[j].inqueue == 0) {
+        process[j].inqueue = 1;
+        enqueue(&queue[0], &process[j]);
+      } else if (process[j].exectime <= 0) {
+        rpro--;
+      }
+    }
+    if (getqsize(queue[0]) != 0) queue[0].tail->next = NULL;
 
     // iterate through all the queues
     for (int i = 0; i < x; i++) {
 
-      // if arrived, add proccess from temp to queue[0]
-
-      // if queue is not empty
       if (queue[i].head != NULL) {
+        printf("\nCLOCK: %d\n", clock);
         flag = 1, sum = 0;
 
-        printf("\nCLOCK: %d\t", clock);
-        rr(queue[i], queue[i].timequant, &clock, &sum);
+        rr(queue[i], &gnatt, queue[i].timequant, &clock, &sum, &pb);
+        printf("CLOCK: %d\t%d\n", clock, gnatt.head->pid);
+
+        // move all processes to highest priority queue
+        if (pb == 0) {
+          for (int j = 0; j < y; j++)
+            process[j].inqueue = 0;
+          pb = pboost;
+        }
 
         // move to next queue
         while (i != x - 1 && queue[i].head != NULL) {
-          if (queue[i].head->exectime > 0) {
+          if (queue[i].head->exectime > 0)
             enqueue(&queue[i + 1], queue[i].head);
-          }
-          *dequeue(&queue[i]);
+          dequeue(&queue[i]);
         }
 
+        queue[i].head = NULL;
         break;
       } else {
         sum = 1;
       }
     }
-    for (int j = 0; j < y; j++) {
+    for (int j = 0; j < y; j++)
       process[j].arrtime -= sum;
-    }
     if (flag == 0) {
+      pb--;
       clock++;
     }
   }
-
-  printf("Q[%d]: %d\n", temp.priority, getqsize(temp));
+  Process* curr = gnatt.head;
+  while (curr != NULL) {
+    printf("%d -> ", curr->pid);
+    curr = curr->next;
+  }
 }
 
 /*

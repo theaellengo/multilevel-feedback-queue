@@ -3,21 +3,28 @@
 #include <math.h>
 #include <stdio.h>
 
-void rr(Queue q, int timeslice, int* clock, int* totalexec)
+void rr(Queue q, Queue* gnatt, int timeslice, int* clock, int* totalexec, int* pb)
 {
   int exec = 0;
-  printf("Q[%d]\t", q.priority);
+  printf("Q[%d]\n", q.priority);
 
   Process* curr = q.head;
   while (curr != q.tail->next) {
     exec = (timeslice < curr->exectime) ? timeslice : curr->exectime;
+    exec = (*pb < exec) ? *pb : exec;
+    *pb -= exec;
     curr->exectime -= exec;
-    *totalexec += exec;
     printf("P%d:%d\t", curr->pid, curr->exectime);
+
+    Process* temp = pcopy(curr);
+    setprocess(temp, clock, exec);
+    enqueue(gnatt, temp);
+    printf("P:%d %d %d %d %d\n", temp->pid, temp->start, temp->completion, temp->waiting, temp->turnaround);
+
+    *totalexec += exec;
+    *clock += exec;
     curr = curr->next;
   }
-
-  *clock += *totalexec;
 }
 
 /*

@@ -19,10 +19,12 @@ typedef struct process {
   int completion; // end time
   int waiting;
   int turnaround;
+  int inqueue;
   struct process* next;
 } Process;
 
 /** Function Declarations **/
+Process* pcopy(Process* process);
 void setprocess(Process* process, int* clock, int exectime);
 void sortbyarrival(Process process[], int n);
 void sortbyburst(Process process[], int n);
@@ -31,13 +33,21 @@ void sortbypid(Process process[], int n);
 void setprocess(Process* process, int* clock, int exectime)
 {
   process->start = *clock;
-  process->exectime -= exectime;
   process->completion = process->start + exectime;
-  // turnaround = completion time - arrival time
   process->turnaround = process->completion - process->arrival;
-  // waiting = (tunraround - burst) || (start - arrival)
   process->waiting = process->turnaround - (process->burst - process->exectime);
-  *clock += exectime;
+}
+
+Process* pcopy(Process* process)
+{
+  Process* p = (Process*)malloc(sizeof(Process));
+  p->pid = process->pid;
+  p->arrival = process->arrival;
+  p->burst = process->burst;
+  p->arrtime = process->arrtime;
+  p->exectime = process->exectime;
+  p->next = NULL;
+  return p;
 }
 
 // sorts processes by arrival time

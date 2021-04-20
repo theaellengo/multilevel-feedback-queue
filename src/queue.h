@@ -21,11 +21,8 @@ void sortqbypriority(Queue q[], int x);
 
 int enqueue(Queue* q, Process* p)
 {
-  if (q->head == NULL)
-    q->head = p;
-  if (q->tail != NULL) {
-    q->tail->next = p;
-  }
+  if (q->head == NULL) q->head = p;
+  if (q->tail != NULL) q->tail->next = p;
   q->tail = p;
   q->tail->next = NULL;
   return 1;
@@ -37,8 +34,8 @@ Process* dequeue(Queue* q)
   q->head = q->head->next;
   if (q->head == NULL) {
     q->tail = NULL;
-    return NULL;
   }
+  temp->next = NULL;
   return temp;
 }
 

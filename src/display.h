@@ -1,4 +1,5 @@
 #include "process.h"
+#include "queue.h"
 #include <math.h>
 #include <stdio.h>
 #include <windows.h>
@@ -8,6 +9,7 @@
 
 void printprocess(Process process[], int n, Process queue[], int m, float awt);
 void printgnatt(Process process[], int n);
+void printgnattqueue(Queue gnatt);
 void printlabel(char* str);
 int getnumdigits(int num);
 
@@ -66,6 +68,27 @@ void printlabel(char* str)
 int getnumdigits(int num)
 {
   return (num == 0) ? 0 : floor(log10(num));
+}
+
+void printgnattqueue(Queue gnatt)
+{
+  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+  printlabel("\nGnatt Chart:\n");
+  Process* curr = gnatt.head;
+  while (curr != NULL) {
+    if (curr->start != 0) printf("[///] ");
+    SetConsoleTextAttribute(hConsole, 15 * 16);
+    printf(" %d", curr->start);
+    //printf("%*c", (curr->completion - curr->start) / 2, ' ');
+    SetConsoleTextAttribute(hConsole, 15 * 16 + 4);
+    printf(" P%d ", curr->pid);
+    SetConsoleTextAttribute(hConsole, 15 * 16);
+    //printf("%*c", (curr->completion - curr->start) / 2, ' ');
+    printf("%d ", curr->completion);
+    SetConsoleTextAttribute(hConsole, 15);
+    printf(" ");
+    curr = curr->next;
+  }
 }
 
 #endif
