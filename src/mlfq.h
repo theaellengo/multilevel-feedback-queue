@@ -5,118 +5,95 @@
 #include <math.h>
 #include <stdio.h>
 
-/*
-  Rule 1: If Priority(A) > Priority(B), A runs (B doesn’t). 
-  Rule 2: If Priority(A) = Priority(B), A & B run in RR
-  Rule 3: When a job enters the system, it is placed at the highest priority (the topmost 
-  queue). 
-  Rule 4: Once a job uses up its time quantum at a given level (regardless of how many 
-  times it has given up the CPU e.g. during an IO burst), its priority is reduced (i.e., it 
-  moves down one queue). 
-  Rule 5: After some time period S, move all the jobs in the system to the topmost queue. 
-  This is what we refer to as a priority boost.
-*/
-
 void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 {
-  int clock = 0, rpro = y, sum = 0, pb = pboost;
+  int clock = 0, pb = pboost, rpro = y, executing = 1;
   float awt = 0;
-  Queue gnatt = { .qid = -1, .priority = 0, .timequant = 0, .head = NULL, .tail = NULL };
+
+  // inititalize queues
+  Queue ready = initqueue(-1);
+  Queue io = initqueue(-1);
+  Queue gnatt[x];
+  for (int i = 0; i < x; i++) {
+    gnatt[i] = initqueue(queue[i].qid);
+  }
 
   sortbyarrival(process, y);
-  while (rpro > 0) {
-    int flag = 0;
 
-    // add ready processes to highest priority queue
-    rpro = y;
-    for (int j = 0; j < y; j++) {
-      if (process[j].arrtime <= 0 && process[j].exectime > 0 && process[j].inqueue == 0) {
-        process[j].inqueue = 1;
-        enqueue(&queue[0], &process[j]);
-      } else if (process[j].exectime <= 0) {
-        rpro--;
+  // start clock
+  while (executing) {
+    int flag = 0, sum = 0;
+
+    int i = 0;
+    while (i != x) {
+
+      // check for newly arrived processes
+      int newpro = 0;
+      for (int i = 0; i < y; i++) {
+        if (process[i].arrival <= clock && process[i].ready == 0) {
+          rpro = rpro - 1, newpro = 1, process[i].ready = 1;
+          enqueue(&ready, &process[i]);
+        }
       }
-    }
-    if (getqsize(queue[0]) != 0) queue[0].tail->next = NULL;
 
-    // iterate through all the queues
-    for (int i = 0; i < x; i++) {
+      // add newly arrived processes to highest priority queue
+      while (ready.head != NULL) {
+        enqueue(&queue[0], dequeue(&ready));
+      }
 
       if (queue[i].head != NULL) {
-        printf("\nCLOCK: %d\n", clock);
-        flag = 1, sum = 0;
+        flag = 1;
 
-        rr(queue[i], &gnatt, queue[i].timequant, &clock, &sum, &pb);
-        printf("CLOCK: %d\t%d\n", clock, gnatt.head->pid);
+        rr(queue[i], &gnatt[i], &clock, &sum, &pb);
 
-        // move all processes to highest priority queue
-        if (pb == 0) {
-          for (int j = 0; j < y; j++)
-            process[j].inqueue = 0;
-          pb = pboost;
+        if (pb <= 0) {
+          for (int j = i; j < x; j++) {
+            while (queue[j].head != queue[j].tail)
+              enqueue(&ready, dequeue(&queue[j]));
+            enqueue(&ready, dequeue(&queue[j]));
+          }
+          pb += pboost;
+          newpro = 1;
         }
 
-        // move to next queue
-        while (i != x - 1 && queue[i].head != NULL) {
+        else {
+          int qidx = (i == x - 1) ? i : i + 1;
           if (queue[i].head->exectime > 0)
-            enqueue(&queue[i + 1], queue[i].head);
-          dequeue(&queue[i]);
+            enqueue(&queue[qidx], dequeue(&queue[i]));
+          else
+            dequeue(&queue[i]);
         }
 
-        queue[i].head = NULL;
         break;
       } else {
-        sum = 1;
+        i++;
+      }
+
+      // if there are no processes in current queues
+      if (isempty(queue[i]) && rpro == 0 && isempty(ready)) {
+        executing = 0;
+      }
+
+      // if a new process arrives
+      if (newpro == 1) {
+        break;
       }
     }
-    for (int j = 0; j < y; j++)
-      process[j].arrtime -= sum;
+
+    // if no process executed at current cpu time
     if (flag == 0) {
       pb--;
+      sum++;
       clock++;
     }
-  }
-  Process* curr = gnatt.head;
-  while (curr != NULL) {
-    printf("%d -> ", curr->pid);
-    curr = curr->next;
-  }
-}
 
-/*
-int qsize = getqsize(queue[0]);
-  Process p[qsize];
-  for (int i = 0; i < qsize; i++)
-    p[i] = *dequeue(&queue[0]);
-
-  printf("\nQ:%d\t", getqsize(queue[0]));
-  for (int i = 0; i < qsize; i++) {
-    printf("P%d\t", p[i].pid);
-  }
-
-  // Sample Code
-  Process curr = *queue[0].head;
-  while ((curr.next) != NULL) {
-    printf("%d\t", curr.pid);
-    curr = *curr.next;
-  }
-  enqueue(&queue[1], dequeue(&queue[0]));
-  enqueue(&queue[1], dequeue(&queue[0]));
-  enqueue(&queue[1], dequeue(&queue[0]));
-  enqueue(&queue[1], dequeue(&queue[0]));
-  printf("\n");
-  curr = *queue[1].head;
-  while ((curr.next) != NULL) {
-    printf("%d\t", curr.pid);
-    curr = *curr.next;
-  }
-  printf("\n");
-  if (queue[2].head != NULL) {
-    curr = *queue[2].head;
-    printf("\nEMPTY QUEUE\n");
-    if (curr.next != NULL) {
-      printf("%d\t", curr);
-      curr = *curr.next;
+    // subtract exec time of current cycle from arrival
+    for (int i = 0; i < y; i++) {
+      process[i].arrtime -= sum;
     }
   }
-*/
+
+  for (int i = 0; i < x; i++) {
+    printgnatt(gnatt[i]);
+  }
+}

@@ -20,11 +20,12 @@ int checkqueues(Queue queue[], int n);
 
 int main()
 {
-  char filename[FILENAME_MAX];
+  //char filename[FILENAME_MAX];
   FILE* fp;
 
   printf("Enter Filename: ");
-  gets(filename);
+  //gets(filename);
+  char filename[] = "test.txt";
 
   // open and read file
   fp = fopen(filename, "r");
@@ -36,6 +37,8 @@ int main()
   // get xys (num queues, num processes, priority boost)
   int xys[3];
   fscanf(fp, "%d %d %d", &xys[0], &xys[1], &xys[2]);
+  if (xys[2] == 0)
+    xys[2] = 1;
 
   // get x queues
   Queue queue[xys[0]];
@@ -53,7 +56,7 @@ int main()
   fclose(fp);
 
   if (xys[0] < 2 || xys[0] > 5)
-    printf("There are too many number of queues (2, 5).\n");
+    printf("There are too many/few number of queues (2, 5).\n");
   else if (xys[1] < 3 || xys[1] > 100)
     printf("Number of processes should be in range (3, 100).\n");
   else if (xys[2] < 0)
@@ -61,7 +64,7 @@ int main()
   else if (checkprocesses(process, xys[1])) {
   } else if (checkqueues(queue, xys[0])) {
   } else {
-    sortqbypriority(queue, xys[0]);
+    sortqueuebypriority(queue, xys[0]);
     mlfq(queue, xys[0], process, xys[1], xys[2]);
   }
 
@@ -71,27 +74,21 @@ int main()
 // scans processes from file & initializes values
 void getprocess(FILE* fp, Process* process)
 {
-  if (fscanf(fp, "%d", &process->pid) == EOF
-      || fscanf(fp, "%d", &process->arrival) == EOF
-      || fscanf(fp, "%d", &process->burst) == EOF
-      || fscanf(fp, "%d", &process->iobt) == EOF
-      || fscanf(fp, "%d", &process->iofreq) == EOF) {
+  if (fscanf(fp, "%d", &process->pid) == EOF || fscanf(fp, "%d", &process->arrival) == EOF || fscanf(fp, "%d", &process->burst) == EOF || fscanf(fp, "%d", &process->iobt) == EOF || fscanf(fp, "%d", &process->iofreq) == EOF) {
     printf("Number of listed values is less than the specfied amount.\n");
     exit(EXIT_FAILURE);
   } else {
     process->exectime = process->burst;
     process->arrtime = process->arrival;
     process->next = NULL;
-    process->inqueue = 0;
+    process->ready = 0;
   }
 }
 
-// scans queues from file & init values
+// scans queues from file & initZ values
 void getqueues(FILE* fp, Queue* queue)
 {
-  if (fscanf(fp, "%d", &queue->qid) == EOF
-      || fscanf(fp, "%d", &queue->priority) == EOF
-      || fscanf(fp, "%d", &queue->timequant) == EOF) {
+  if (fscanf(fp, "%d", &queue->qid) == EOF || fscanf(fp, "%d", &queue->priority) == EOF || fscanf(fp, "%d", &queue->timequant) == EOF) {
     printf("Number of values is less than the specfied amount.\n");
     exit(EXIT_FAILURE);
   } else {
@@ -108,11 +105,7 @@ int checkprocesses(Process process[], int n)
         printf("PIDs should not be the same.\n");
         return 1;
       }
-    if (process[i].pid < 0
-        || process[i].arrival < 0
-        || process[i].iobt < 0
-        || process[i].iofreq < 0
-        || process[i].burst < 0) {
+    if (process[i].pid < 0 || process[i].arrival < 0 || process[i].iobt < 0 || process[i].iofreq < 0 || process[i].burst < 0) {
       printf("Process values should not be negative.\n");
       return 1;
     }
@@ -124,14 +117,11 @@ int checkqueues(Queue queue[], int n)
 {
   for (int i = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++)
-      if (queue[i].qid == queue[j].qid
-          || queue[i].priority == queue[j].priority) {
+      if (queue[i].qid == queue[j].qid || queue[i].priority == queue[j].priority) {
         printf("Neither QIDs nor priorities should have the same values.\n");
         return 1;
       }
-    if (queue[i].qid < 0
-        || queue[i].priority < 0
-        || queue[i].timequant < 0) {
+    if (queue[i].qid < 0 || queue[i].priority < 0 || queue[i].timequant < 0) {
       printf("Queue values should not be negative.\n");
       return 1;
     }
