@@ -1,4 +1,5 @@
 #include "process.h"
+#include "queue.h"
 #include <math.h>
 #include <stdio.h>
 #include <windows.h>
@@ -7,7 +8,7 @@
 #define DISPLAY
 
 void printprocess(Process process[], int n, Process queue[], int m, float awt);
-void printgnatt(Process process[], int n);
+void printgnatt(Queue gnatt);
 void printlabel(char* str);
 int getnumdigits(int num);
 
@@ -36,24 +37,34 @@ void printprocess(Process process[], int n, Process queue[], int m, float awt)
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 }
 
-void printgnatt(Process process[], int n)
+void printgnatt(Queue gnatt)
 {
   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-  printlabel("\nGnatt Chart:\n");
-  for (int i = 0; i < n; i++) {
-    if (i == 0 && process[i].start != 0) printf("[///] ");
-    if (i > 0 && process[i - 1].completion != process[i].start) printf("[///] ");
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+  printf("\nQueue: %d\n", gnatt.qid);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+  Process* curr = gnatt.head;
+  Process* last = gnatt.head;
+  while (curr != NULL) {
+    if (last == curr) {
+      if (curr->start != 0) printf("[///] ");
+    } else if (last->completion != curr->start) {
+      printf("[///] ");
+    }
     SetConsoleTextAttribute(hConsole, 15 * 16);
-    printf(" %d", process[i].start);
-    printf("%*c", (process[i].completion - process[i].start) / 2, ' ');
+    printf(" %d", curr->start);
+    printf("%*c", (curr->completion - curr->start) / 2, ' ');
     SetConsoleTextAttribute(hConsole, 15 * 16 + 4);
-    printf(" P%d ", process[i].pid);
+    printf(" P%d ", curr->pid);
+    printf("%*c", (curr->completion - curr->start) / 2, ' ');
     SetConsoleTextAttribute(hConsole, 15 * 16);
-    printf("%*c", (process[i].completion - process[i].start) / 2, ' ');
-    printf("%d ", process[i].completion);
+    printf("%d ", curr->completion);
     SetConsoleTextAttribute(hConsole, 15);
     printf(" ");
+    last = curr;
+    curr = curr->next;
   }
+  printf("\n");
 }
 
 void printlabel(char* str)
