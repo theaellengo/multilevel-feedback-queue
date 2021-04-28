@@ -17,8 +17,8 @@ typedef struct queue {
 Queue initqueue(int qid);
 void enqueue(Queue* q, Process* p);
 Process* dequeue(Queue* q);
-int getqsize(Queue q);
 void sortqbypriority(Queue q[], int x);
+void printqueue(Queue q);
 
 Queue initqueue(int qid)
 {
@@ -34,13 +34,6 @@ Queue initqueue(int qid)
 int isempty(Queue q)
 {
   if (q.head == NULL) return 1;
-  return 0;
-}
-
-int arequeuesempty(Queue q[], int x)
-{
-  for (int i = 0; i < x; i++)
-    if (q[i].head == NULL) return 1;
   return 0;
 }
 
@@ -61,21 +54,6 @@ Process* dequeue(Queue* q)
   return temp;
 }
 
-// returns size of queues
-int getqueuesize(Queue q)
-{
-  int count = 0;
-  if (q.head != NULL) {
-    Process* curr = q.head;
-    while (curr != NULL) {
-      count++;
-      curr = curr->next;
-    }
-  }
-  return count;
-}
-
-// sort queues by priority (ascending)
 void sortqueuebypriority(Queue q[], int x)
 {
   Queue temp;
@@ -88,19 +66,10 @@ void sortqueuebypriority(Queue q[], int x)
       }
 }
 
-void movequeue(Queue* a, Queue* b)
-{
-  a->head = NULL;
-  while (b->head != NULL)
-    enqueue(a, dequeue(b));
-  b->head = NULL;
-  b->tail = NULL;
-}
-
 void printqueue(Queue q)
 {
   Process* curr = q.head;
-  printf("HEAD: %d\tTAIL: %d\t\t", q.head->pid, q.tail->pid);
+  printf("\nQ[%d] HEAD: %d\tTAIL: %d\n", q.qid, q.head->pid, q.tail->pid);
   while (curr != NULL) {
     printf("P%d -> ", curr->pid);
     curr = curr->next;

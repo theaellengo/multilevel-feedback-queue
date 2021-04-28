@@ -41,7 +41,11 @@ void printgnatt(Queue gnatt)
 {
   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
-  printf("\nQueue: %d\n", gnatt.qid);
+  if (gnatt.qid != -1) {
+    printf("\nQueue %d\n", gnatt.qid);
+  } else {
+    printf("\nIO\n", gnatt.qid);
+  }
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
   Process* curr = gnatt.head;
   Process* last = gnatt.head;
