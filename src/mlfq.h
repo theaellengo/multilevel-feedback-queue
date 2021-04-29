@@ -1,9 +1,9 @@
 #include "display.h"
+#include "io.h"
 #include "process.h"
 #include "queue.h"
 #include "rr.h"
 #include <stdio.h>
-Queue moveremaining(Queue* q);
 
 void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 {
@@ -45,7 +45,7 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
         // execute round robin
         rr(queue[i], &gnatt[i], &clock, &sum, &pb, 0);
 
-        if (execio(queue, gnatt, &io, i, x, &clock, &sum, &pb, &pdone)) {
+        if (ioburst(queue, gnatt, &io, i, x, &clock, &sum, &pb, &pdone)) {
           break;
         }
 
@@ -109,8 +109,7 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
     }
   }
 
-  for (int i = 0; i < x; i++) {
+  for (int i = 0; i < x; i++)
     printgnatt(gnatt[i]);
-  }
   printgnatt(io);
 }
