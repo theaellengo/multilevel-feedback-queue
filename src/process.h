@@ -10,7 +10,7 @@
 typedef struct process {
   int pid;
   int arrival, arrtime;
-  int burst, exectime;
+  int burst, exectime, exectq;
   int iobt, iofreq;
   int start;
   int completion;
@@ -51,15 +51,13 @@ Process* pcopy(Process* p)
 void sortbyarrival(Process process[], int n)
 {
   Process temp;
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
+  for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
       if (process[i].arrtime > process[j].arrtime) {
         temp = process[i];
         process[i] = process[j];
         process[j] = temp;
       }
-    }
-  }
 }
 
 void sortbypid(Process process[], int n)

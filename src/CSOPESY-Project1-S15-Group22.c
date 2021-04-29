@@ -82,6 +82,7 @@ void getprocess(FILE* fp, Process* process)
     process->arrtime = process->arrival;
     process->next = NULL;
     process->ready = 0;
+    process->exectq = 0;
   }
 }
 
