@@ -69,7 +69,8 @@ void sortqueuebypriority(Queue q[], int x)
 void printqueue(Queue q)
 {
   Process* curr = q.head;
-  printf("\nQ[%d] HEAD: %d\tTAIL: %d\n", q.qid, q.head->pid, q.tail->pid);
+  //printf("\nQ[%d] HEAD: %d\tTAIL: %d\n", q.qid, q.head->pid, q.tail->pid);
+  printf("Q[%d]\t", q.qid);
   while (curr != NULL) {
     printf("P%d -> ", curr->pid);
     curr = curr->next;

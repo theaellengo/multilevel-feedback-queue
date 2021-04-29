@@ -45,7 +45,33 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 
         rr(queue[i], &gnatt[i], &io, &clock, &sum, &pb, 0);
 
-        if (pb <= 0) {
+        if (queue[i].head->iobt > 0 && queue[i].head->exectime > 0 && isdone == 0 && queue[i].head->iofreq <= queue[i].timequant) {
+
+          Process* temp = pcopy(queue[i].head);
+          setprocess(temp, &clock, queue[i].head->iobt);
+          enqueue(&io, temp);
+
+          Process* ioexec = queue[i].head;
+          int qidx = (i == x - 1 || queue[i].head->next != NULL) ? i : i + 1;
+
+          if (queue[qidx].head != NULL) {
+            if (queue[qidx].head == ioexec)
+              enqueue(&queue[qidx], dequeue(&queue[qidx]));
+            rr(queue[qidx], &gnatt[qidx], &io, &clock, &sum, &pb, temp->completion - temp->start);
+            while (clock < temp->completion) {
+              enqueue(&queue[qidx], dequeue(&queue[qidx]));
+              rr(queue[qidx], &gnatt[qidx], &io, &clock, &sum, &pb, temp->completion - clock);
+            }
+          }
+
+          int nqidx = (i == x - 1) ? i : i + 1;
+          enqueue(&queue[nqidx], dequeue(&queue[qidx]));
+          isdone = 1;
+        }
+
+        else if (pb <= 0) {
+          if (queue[i].head != NULL)
+            enqueue(&queue[i], dequeue(&queue[i]));
           for (int j = i; j < x; j++) {
             while (queue[j].head != queue[j].tail)
               enqueue(&ready, dequeue(&queue[j]));
@@ -56,31 +82,14 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
           newpro = 1;
         }
 
-        else if (queue[i].head->iobt > 0 && queue[i].head->exectime > 0 && isdone == 0) {
-
-          Process* temp = pcopy(queue[i].head);
-          setprocess(temp, &clock, queue[i].head->iobt);
-          enqueue(&io, temp);
-
-          if (i != x - 1) {
-            if (queue[i].head != NULL) {
-              rr(queue[i + 1], &gnatt[i + 1], &io, &clock, &sum, &pb, temp->completion - temp->start);
-            }
-          }
-
-          enqueue(&queue[i], dequeue(&queue[i]));
-          isdone = 1;
-          break;
-        }
-
         else {
-          int qidx = (i != x - 1) ? i + 1 : i;
+          int qidx = (i == x - 1) ? i : i + 1;
           if (queue[i].head->exectime > 0)
             enqueue(&queue[qidx], dequeue(&queue[i]));
           else
             dequeue(&queue[i]);
+          isdone = 0;
         }
-        isdone = 0;
 
         break;
       } else {
