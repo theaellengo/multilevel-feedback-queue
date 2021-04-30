@@ -37,4 +37,4 @@ This project was implemented as one of the requirements for the course CSOPESY.
 
 ## Sample Output:
 
-![result](result.png)
+![result](result.PNG)
