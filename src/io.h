@@ -32,7 +32,11 @@ int ioburst(Queue q[], Queue gnatt[], Queue* io, int i, int x, int* clock, int* 
         // continue executing processes while io is still happening
         while (*clock < temp->completion && ioexec->exectq > 0) {
           rr(q[qidx], &gnatt[qidx], clock, sum, pb, temp->completion - *clock);
-          ioburst(q, gnatt, io, qidx, x, clock, sum, pb, pdone);
+          while (*clock < temp->completion) {
+            int nqidx = (i == x - 1 || q[qidx].head->next == NULL) ? i : i + 1;
+            rr(q[nqidx], &gnatt[nqidx], clock, sum, pb, temp->completion - *clock);
+          }
+          if (ioburst(q, gnatt, io, qidx, x, clock, sum, pb, pdone)) { break; }
           int nqidx = (i == x - 1) ? i : i + 1;
           enqueue(&q[nqidx], dequeue(&q[qidx]));
         }

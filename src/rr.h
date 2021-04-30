@@ -14,10 +14,10 @@ void rr(Queue q, Queue* gnatt, int* clock, int* sum, int* pb, int execfor)
   // get the minimum execution time
   if (execfor == 0) {
     if (q.head->exectq <= 0) q.head->exectq = exec;
-    if (exec > q.head->iofreq && q.head->iofreq > 0) exec = q.head->iofreq;
   } else {
     if (execfor < exec) exec = execfor;
   }
+  if (exec > q.head->iofreq && q.head->iofreq > 0) exec = q.head->iofreq;
 
   q.head->exectime -= exec;
   q.head->exectq -= exec;

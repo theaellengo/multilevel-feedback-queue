@@ -71,7 +71,7 @@ void printqueue(Queue q)
   Process* curr = q.head;
   printf("Q[%d]\t", q.qid);
   while (curr != NULL) {
-    printf("P%d: %d -> %d\n", curr->pid, curr->start, curr->completion);
+    printf("P%d ->", curr->pid);
     curr = curr->next;
   }
 }
