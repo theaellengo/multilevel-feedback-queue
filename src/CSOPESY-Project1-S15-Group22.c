@@ -1,10 +1,3 @@
-/***************************************************************
-Name: Go, Thea Ellen
-      Chong, Dianne
-Group: 22
-Section: S12
-***************************************************************/
-
 // include libraries
 #include "mlfq.h"
 #include "process.h"
