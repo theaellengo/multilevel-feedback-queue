@@ -52,7 +52,7 @@ void printgnatt(Queue gnatt)
   while (curr != NULL) {
     if (last == curr) {
       if (curr->start != 0) printf("[///] ");
-    } else if (last->completion != curr->start) {
+    } else if (last->completion < curr->start) {
       printf("[///] ");
     }
     SetConsoleTextAttribute(hConsole, 15 * 16);
