@@ -19,14 +19,16 @@ void rr(Queue q, Queue* gnatt, int* clock, int* sum, int* pb, int execfor)
     if (execfor < exec) exec = execfor;
   }
 
+  q.head->exectime -= exec;
+  q.head->exectq -= exec;
+  q.head->qid = q.qid;
+
   // add copy of process to current queue
   Process* temp = pcopy(q.head);
   setprocess(temp, clock, exec);
   if (exec > 0) enqueue(gnatt, temp);
 
   // update values
-  q.head->exectime -= exec;
-  q.head->exectq -= exec;
   *sum += exec;
   *clock += exec;
   *pb -= exec;

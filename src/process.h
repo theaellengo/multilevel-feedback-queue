@@ -9,6 +9,7 @@
 /** Process Struct **/
 typedef struct process {
   int pid;
+  int qid;
   int arrival, arrtime;
   int burst, exectime, exectq;
   int iobt, iofreq;
@@ -39,10 +40,15 @@ Process* pcopy(Process* p)
 {
   Process* temp = (Process*)malloc(sizeof(Process));
   temp->pid = p->pid;
+  temp->qid = p->qid;
   temp->arrival = p->arrival;
   temp->burst = p->burst;
   temp->arrtime = p->arrtime;
   temp->exectime = p->exectime;
+  temp->start = p->start;
+  temp->completion = p->completion;
+  temp->turnaround = p->turnaround;
+  temp->waiting = p->waiting;
   temp->next = NULL;
   return temp;
 }
@@ -66,6 +72,18 @@ void sortbypid(Process process[], int n)
   for (int i = 0; i < n; i++)
     for (int j = i + 1; j < n; j++)
       if (process[i].pid > process[j].pid) {
+        temp = process[i];
+        process[i] = process[j];
+        process[j] = temp;
+      }
+}
+
+void sortbystart(Process process[], int n)
+{
+  Process temp;
+  for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
+      if (process[i].start > process[j].start) {
         temp = process[i];
         process[i] = process[j];
         process[j] = temp;

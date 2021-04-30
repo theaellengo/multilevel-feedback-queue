@@ -20,12 +20,11 @@ int checkqueues(Queue queue[], int n);
 
 int main()
 {
-  //char filename[FILENAME_MAX];
+  char filename[FILENAME_MAX];
   FILE* fp;
 
   printf("Enter Filename: ");
-  //gets(filename);
-  char filename[] = "test.txt";
+  gets(filename);
 
   // open and read file
   fp = fopen(filename, "r");

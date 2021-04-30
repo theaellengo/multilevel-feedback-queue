@@ -5,6 +5,8 @@
 #include "rr.h"
 #include <stdio.h>
 
+void getawt(Queue q[], int x, int y, float* awt);
+
 void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 {
   int clock = 0, pb = pboost, rpro = y, run = 1, pdone = 0;
@@ -12,11 +14,10 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 
   // inititalize queues
   Queue ready = initqueue(-1);
-  Queue io = initqueue(-1);
   Queue gnatt[x + 1];
-  for (int i = 0; i < x; i++) {
+  for (int i = 0; i < x; i++)
     gnatt[i] = initqueue(queue[i].qid);
-  }
+  gnatt[x] = initqueue(-1); // io queue
 
   sortbyarrival(process, y);
 
@@ -45,7 +46,7 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
         // execute round robin
         rr(queue[i], &gnatt[i], &clock, &sum, &pb, 0);
 
-        if (ioburst(queue, gnatt, &io, i, x, &clock, &sum, &pb, &pdone)) {
+        if (ioburst(queue, gnatt, &gnatt[x], i, x, &clock, &sum, &pb, &pdone)) {
           break;
         }
 
@@ -109,7 +110,25 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
     }
   }
 
-  for (int i = 0; i < x; i++)
+  getawt(gnatt, x, y, &awt);
+
+  printlabel("\n\nGnatt Charts\n");
+  printf("------------------------------------------------------------\n");
+  for (int i = 0; i < x + 1; i++)
     printgnatt(gnatt[i]);
-  printgnatt(io);
+
+  printprocess(gnatt, gnatt[x], process, x, y, awt);
+}
+
+void getawt(Queue q[], int x, int y, float* awt)
+{
+  for (int i = 0; i < x; i++) {
+    Process* curr = q[i].head;
+    while (curr != NULL) {
+      if (curr->exectime <= 0)
+        *awt += curr->waiting;
+      curr = curr->next;
+    }
+  }
+  *awt /= y;
 }
