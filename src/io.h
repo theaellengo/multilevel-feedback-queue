@@ -7,6 +7,7 @@
 #ifndef IO
 #define IO
 
+// in this implementation, IO does not overlap
 int ioburst(Queue q[], Queue gnatt[], Queue* io, int i, int x, int* clock, int* sum, int* pb, int* pdone)
 {
   // if process not done executig and has io burst
