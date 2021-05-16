@@ -45,7 +45,9 @@ void mlfq(Queue queue[], int x, Process process[], int y, int pboost)
 
         // execute round robin
         rr(queue[i], &gnatt[i], &clock, &sum, &pb, 0);
-        if (ioburst(queue, gnatt, &gnatt[x], i, x, &clock, &sum, &pb, &pdone)) { break; }
+        if (ioburst(queue, gnatt, &gnatt[x], i, x, &clock, &sum, &pb, &pdone)) {
+          break;
+        }
 
         // process boost
         if (pb <= 0) {
